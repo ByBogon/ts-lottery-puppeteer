@@ -1,6 +1,6 @@
 Automatic Lottery Project with puppeteer
 
-Nodejs + Puppeteer + Typescript
+Puppeteer + Typescript
 
 Goal
 
