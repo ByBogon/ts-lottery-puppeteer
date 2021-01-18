@@ -15,6 +15,7 @@ const iframeUrl:string = "https://ol.dhlottery.co.kr/olotto/game/game645.do";
 
 (async () => {
   const limitedArrLength:number = 5;
+  let chosenNumbers = [];
   const browser = await puppeteer.launch({ headless: false }); // default is true
   const [page] = await browser.pages();
   await page.goto(LOTTERY_URL, { waitUntil: "networkidle2" });
