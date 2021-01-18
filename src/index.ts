@@ -1,9 +1,14 @@
+import * as dotenv from "dotenv";
+const dirs = __dirname.split("/")
+dirs.pop()
+const rootDir = dirs.join("/")
+dotenv.config({path: rootDir+"/.env"})
+
 import puppeteer = require("puppeteer");
 
-const LOTTERY_URL: string =
-  "https://www.dhlottery.co.kr/user.do?method=login&returnUrl=";
-const userId:string = "test";
-const password:string = "test";
+const LOTTERY_URL: string = process.env.LOTTERY_URL as string;
+const userId:string  = process.env.ID as string;
+const password:string  = process.env.PASSWORD as string;
 const passwordType:string = 'input[type="password"]';
 
 const iframeUrl:string = "https://ol.dhlottery.co.kr/olotto/game/game645.do";
