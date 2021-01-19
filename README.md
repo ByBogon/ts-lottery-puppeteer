@@ -4,7 +4,7 @@ Puppeteer + Typescript
 
 Goal
 
-1. Make a crawler with puppeteer
+1. AutoLogin
 2. Set a scheduler to run it weekly
 3. Send me a notification or an email if there's no money left to do a lottery
 4. Gather all numbers that was first prize
