@@ -1,3 +1,5 @@
+import { Browser } from "puppeteer";
+
 export const input = {
   waysToBuy: {
     // 혼합선택
@@ -13,3 +15,11 @@ export const input = {
     "3": {}
   }
 };
+
+export interface BaseInput {
+  browser: Browser;
+}
+export interface LoginInformations extends BaseInput {
+  id: string;
+  pwd: string;
+}

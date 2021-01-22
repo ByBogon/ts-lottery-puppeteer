@@ -1,35 +1,13 @@
 import * as puppeteer from "puppeteer";
 import * as cheerio from "cheerio";
+import { LoginInformations } from "./input";
+import { UserInformation } from "./output";
 
-export const crawlingStart = async (
-  id: string,
-  pwd: string,
-  waysToBuy: { [key: string]: any }
-) => {
+export const getUserInformation = async (
+  page: puppeteer.Page
+): Promise<UserInformation> => {
   const LOTTERY_URL: string = process.env.LOTTERY_URL as string;
-  const userId: string = (process.env.ID as string) || id;
-  const password: string = (process.env.PASSWORD as string) || pwd;
-  const passwordType: string = 'input[type="password"]';
-
-  const iframeUrl: string = "https://ol.dhlottery.co.kr/olotto/game/game645.do";
-
-  const limitedArrLength: number = 5;
-  let chosenNumbers = [];
-  const browser = await puppeteer.launch({ headless: false }); // default is true
-  const page = await browser.newPage();
-  await page.setViewport({
-    width: 1366,
-    height: 768
-  });
-  await page.goto(LOTTERY_URL, { waitUntil: "networkidle2" });
-
-  await page.type('input[id="userId"]', userId);
-  await page.type(passwordType, password);
-  await page.click('a[class="btn_common lrg blu"]');
-  await page.waitForNavigation({ waitUntil: "networkidle2" });
-
   const content = await page.content();
-
   const $ = cheerio.load(content);
 
   const depositMoneyHTML = $(
@@ -41,6 +19,75 @@ export const crawlingStart = async (
     depositMoneyHTML.slice(0, depositMoneyHTML.length - 1).replace(/,/g, "")
   );
   console.log(`DepositMoney: ${depositMoney}`);
+
+  const myPageURL = $(
+    "body > div:nth-child(1) > header > div.header_con > div.top_menu > form > div > ul.account > li:nth-child(2) > a[href]"
+  ).get()[0].attribs.href;
+  console.log(myPageURL);
+  await page.goto(LOTTERY_URL + myPageURL, { waitUntil: "networkidle2" });
+
+  const myPageContent = await page.content();
+  const $MyPage = cheerio.load(myPageContent);
+
+  //   await page.click(
+  //     "body > div:nth-child(1) > header > div.header_con > div.top_menu > form > div > ul.account > li:nth-child(2) > a"
+  //   );
+
+  //   await page.waitForNavigation({ waitUntil: "networkidle0" });
+
+  const bankAccount = $MyPage(
+    "#article > div:nth-child(2) > div > div.box_information > div.box.money > div.total_account_number > table > tbody > tr:nth-child(1) > td"
+  ).text();
+  console.log(bankAccount);
+
+  return { depositMoney, bankAccount };
+};
+
+export const signIn = async ({
+  id,
+  pwd,
+  browser
+}: LoginInformations): Promise<puppeteer.Page> => {
+  const LOTTERY_URL: string = process.env.LOTTERY_URL as string;
+  const userId: string = (process.env.ID as string) || id;
+  const password: string = (process.env.PASSWORD as string) || pwd;
+  const idType: string = 'input[id="userId"]';
+  const passwordType: string = 'input[type="password"]';
+
+  const page = await browser.newPage();
+  await page.setViewport({
+    width: 1366,
+    height: 768
+  });
+  await page.goto(LOTTERY_URL, { waitUntil: "networkidle2" });
+
+  const content = await page.content();
+  const $ = cheerio.load(content);
+
+  const loginPageURL = $(
+    "body > div:nth-child(1) > header > div.header_con > div.top_menu > form > div > ul > li.log > a[href]"
+  ).get()[0].attribs.href;
+  await page.goto(LOTTERY_URL + loginPageURL, { waitUntil: "networkidle2" });
+
+  await page.type(idType, userId);
+  await page.type(passwordType, password);
+  await page.click('a[class="btn_common lrg blu"]');
+  await page.waitForNavigation({ waitUntil: "networkidle2" });
+  return page;
+};
+
+export const buyLottery = async (
+  page: puppeteer.Page,
+  waysToBuy: { [key: string]: any }
+) => {
+  const iframeUrl: string = "https://ol.dhlottery.co.kr/olotto/game/game645.do";
+
+  const limitedArrLength: number = 5;
+  let chosenNumbers = [];
+
+  const content = await page.content();
+
+  const $ = cheerio.load(content);
 
   await page.click("#gnb > ul > li.gnb1");
   await page.click(".gnb1_1");
