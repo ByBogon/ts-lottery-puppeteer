@@ -1,6 +1,6 @@
 import * as puppeteer from "puppeteer";
 import * as cheerio from "cheerio";
-import { LoginInformations } from "./input";
+import { LoginInformations, WaysToBuy } from "./input";
 import { UserInformation } from "./output";
 
 export const getUserInformation = async (
@@ -13,7 +13,6 @@ export const getUserInformation = async (
   const depositMoneyHTML = $(
     "body > div:nth-child(1) > header > div.header_con > div.top_menu > form > div > ul.information > li > a:nth-child(2) > strong"
   ).text();
-  console.log(`DepositMoneyHTML: ${depositMoneyHTML}`);
 
   const depositMoney: number = parseInt(
     depositMoneyHTML.slice(0, depositMoneyHTML.length - 1).replace(/,/g, "")
@@ -28,12 +27,6 @@ export const getUserInformation = async (
 
   const myPageContent = await page.content();
   const $MyPage = cheerio.load(myPageContent);
-
-  //   await page.click(
-  //     "body > div:nth-child(1) > header > div.header_con > div.top_menu > form > div > ul.account > li:nth-child(2) > a"
-  //   );
-
-  //   await page.waitForNavigation({ waitUntil: "networkidle0" });
 
   const bankAccount = $MyPage(
     "#article > div:nth-child(2) > div > div.box_information > div.box.money > div.total_account_number > table > tbody > tr:nth-child(1) > td"
@@ -78,7 +71,7 @@ export const signIn = async ({
 
 export const buyLottery = async (
   page: puppeteer.Page,
-  waysToBuy: { [key: string]: any }
+  waysToBuy: WaysToBuy
 ) => {
   const iframeUrl: string = "https://ol.dhlottery.co.kr/olotto/game/game645.do";
 
