@@ -5,6 +5,7 @@ export interface WaysToBuy {
   autos: number[];
   lastNumbers: number[];
   mines: number[];
+  totalCounts: number;
 }
 
 export interface BaseInput {

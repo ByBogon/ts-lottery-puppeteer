@@ -85,9 +85,20 @@ export const buyLottery = async (
   await page.click("#gnb > ul > li.gnb1");
   await page.click(".gnb1_1");
 
-  await page.waitForNavigation({ waitUntil: "networkidle2" });
+  const result = await page.waitForNavigation({ waitUntil: "networkidle2" });
 
-  const waysToBuyHTML = $("#tabWay2Buy").children();
+  result.url;
+  const waysToBuyHTML = $("#tabWay2Buy");
+
+  const waysToBuyURLs = waysToBuyHTML.map((index, list) => {
+    console.log(`index: ${index}`);
+    const url = $(list)
+      .find(`#num${index + 1}`)
+      .get()[0].attribs.href;
+    console.log(url);
+    return url;
+  });
+  console.log(waysToBuyURLs);
 
   // const popup:Promise<puppeteer.Page> = new Promise(resolve =>
   //   browser.on("targetcreated", target => resolve(target.page()))

@@ -22,13 +22,14 @@ router.post("/test", async (ctx, next) => {
 
   const browser = await puppeteer.launch({ headless: false }); // default is true
   const loginResult = await signIn({ id, pwd, browser });
-  buyLottery(loginResult, waysToBuy);
+  await buyLottery(loginResult, waysToBuy);
   ctx.body = "Test";
   await next();
 });
 
 router.get("/lotteryer", async (ctx, next) => {
   const { id, pwd } = ctx.request.query;
+
   const browser = await puppeteer.launch({ headless: false }); // default is true
   const loginResult = await signIn({ id, pwd, browser });
   const result = await getUserInformation(loginResult);
