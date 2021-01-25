@@ -2,11 +2,26 @@ import * as puppeteer from "puppeteer";
 import * as cheerio from "cheerio";
 import { LoginInformations, WaysToBuy } from "./input";
 import { UserInformation } from "./output";
+import got from "got";
+
+const LOTTERY_URL: string = process.env.LOTTERY_URL as string;
+
+const buildForm = (data: any) => {
+  const keys = Object.keys(data);
+  const form = [];
+
+  for (let i = 0, l = keys.length; i < l; i++) {
+    form.push(
+      encodeURIComponent(keys[i]) + "=" + encodeURIComponent(data[keys[i]])
+    );
+  }
+
+  return form.join("&");
+};
 
 export const getUserInformation = async (
   page: puppeteer.Page
 ): Promise<UserInformation> => {
-  const LOTTERY_URL: string = process.env.LOTTERY_URL as string;
   const content = await page.content();
   const $ = cheerio.load(content);
 
@@ -87,18 +102,22 @@ export const buyLottery = async (
 
   const result = await page.waitForNavigation({ waitUntil: "networkidle2" });
 
-  result.url;
-  const waysToBuyHTML = $("#tabWay2Buy");
+  // const evalResult = await page.evaluate(() => {
+  //   let data = []
+  //   const body = document
+  // })
 
-  const waysToBuyURLs = waysToBuyHTML.map((index, list) => {
-    console.log(`index: ${index}`);
-    const url = $(list)
-      .find(`#num${index + 1}`)
-      .get()[0].attribs.href;
-    console.log(url);
-    return url;
-  });
-  console.log(waysToBuyURLs);
+  // const waysToBuyHTML = $("#tabWay2Buy");
+
+  // const waysToBuyURLs = waysToBuyHTML.map((index, list) => {
+  //   console.log(`index: ${index}`);
+  //   const url = $(list)
+  //     .find(`#num${index + 1}`)
+  //     .get()[0].attribs.href;
+  //   console.log(url);
+  //   return url;
+  // });
+  // console.log(waysToBuyURLs);
 
   // const popup:Promise<puppeteer.Page> = new Promise(resolve =>
   //   browser.on("targetcreated", target => resolve(target.page()))
@@ -159,4 +178,40 @@ export const buyLottery = async (
   //   console.log(context);
 
   //   await browser.close();
+};
+
+export const getCurrentLotteryNumbers = async (browser: puppeteer.Browser) => {
+  try {
+    const page = await browser.newPage();
+    await page.setViewport({
+      width: 1366,
+      height: 768
+    });
+    await page.goto(LOTTERY_URL, { waitUntil: "networkidle2" });
+    let currentLotteryNumbersURL = "common.do?method=getLottoNumber";
+
+    const content = await page.content();
+    const $ = cheerio.load(content);
+
+    const currentDrawNumber = $("#lottoDrwNo").text();
+    console.log(currentDrawNumber);
+
+    const client = got.extend({
+      prefixUrl: LOTTERY_URL,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+      }
+    });
+
+    const result: any = await client.post(currentLotteryNumbersURL, {
+      responseType: "json",
+      // body: buildForm(data),
+      body: `drwNo=${currentDrawNumber}`,
+      resolveBodyOnly: true
+    });
+    console.log(result);
+    return result;
+  } catch (error) {
+    console.error(error);
+  }
 };

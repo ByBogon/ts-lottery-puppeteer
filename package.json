@@ -8,6 +8,7 @@
     "@types/dotenv": "^8.2.0",
     "cheerio": "^1.0.0-rc.5",
     "dotenv": "^8.2.0",
+    "got": "^11.8.1",
     "koa": "^2.13.1",
     "koa-bodyparser": "^4.3.0",
     "koa-router": "^10.0.0",

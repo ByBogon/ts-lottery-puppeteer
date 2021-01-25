@@ -9,7 +9,12 @@ import * as bodyParser from "koa-bodyparser";
 import * as Router from "koa-router";
 import * as puppeteer from "puppeteer";
 
-import { buyLottery, getUserInformation, signIn } from "./crawling";
+import {
+  buyLottery,
+  getCurrentLotteryNumbers,
+  getUserInformation,
+  signIn
+} from "./crawling";
 
 const app = new koa();
 const router = new Router();
@@ -35,6 +40,14 @@ router.get("/lotteryer", async (ctx, next) => {
   const result = await getUserInformation(loginResult);
   browser.close();
   ctx.body = result;
+  await next();
+});
+
+router.get("/current-draw-number", async (ctx, next) => {
+  const browser = await puppeteer.launch({ headless: false }); // default is true
+  const result = await getCurrentLotteryNumbers(browser);
+  ctx.body = result;
+  browser.close();
   await next();
 });
 
