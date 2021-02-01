@@ -85,6 +85,7 @@ export const signIn = async ({
 };
 
 export const buyLottery = async (
+  browser: puppeteer.Browser,
   page: puppeteer.Page,
   waysToBuy: WaysToBuy
 ) => {
@@ -93,14 +94,34 @@ export const buyLottery = async (
   const limitedArrLength: number = 5;
   let chosenNumbers = [];
 
-  const content = await page.content();
-
-  const $ = cheerio.load(content);
-
   await page.click("#gnb > ul > li.gnb1");
   await page.click(".gnb1_1");
-
   const result = await page.waitForNavigation({ waitUntil: "networkidle2" });
+
+  const newPage = await browser.newPage();
+  const url: string =
+    "https://el.dhlottery.co.kr/game/TotalGame.jsp?LottoId=LO40";
+  await newPage.goto(url, {
+    waitUntil: ["load", "domcontentloaded", "networkidle0"]
+  });
+  await newPage.waitForSelector("#ifrm_tab");
+
+  const frame = page.frames().find(frame => frame.name() === "ifrm_tab");
+  console.log(frame);
+  // const button = await frame?.waitForSelector(
+  //   "#document > #tabWay2Buy > #num4 ",
+  //   { visible: true }
+  // );
+  // const button = await frame?.$("#num4");
+  // button?.click();
+
+  // const button = await page.evaluate(() => document.querySelector("#num4"));
+  // await button.click();
+
+  // selectWayTab(3); return false;
+  const content = await newPage.content();
+
+  const $ = cheerio.load(content);
 
   // const evalResult = await page.evaluate(() => {
   //   let data = []
@@ -214,4 +235,36 @@ export const getCurrentLotteryNumbers = async (browser: puppeteer.Browser) => {
   } catch (error) {
     console.error(error);
   }
+};
+
+export const getAllMyFavoriteNumbers = async (
+  browser: puppeteer.Browser,
+  page: puppeteer.Page
+) => {
+  const newPage = await browser.newPage();
+  const url: string =
+    "https://el.dhlottery.co.kr/game/TotalGame.jsp?LottoId=LO40";
+  await newPage.goto(url, { waitUntil: "networkidle2" });
+
+  await newPage.goto(url, {
+    waitUntil: ["load", "domcontentloaded", "networkidle0"]
+  });
+  await newPage.waitForSelector("#ifrm_tab");
+
+  const frame = page.frames().find(frame => frame.name() === "ifrm_tab");
+  console.log(frame);
+  const button = await frame?.waitForSelector(
+    "#document > #tabWay2Buy > #num4 ",
+    { visible: true }
+  );
+  // const button = await frame?.$("#num4");
+  await button?.click();
+
+  const myNumberList = await frame?.$("#myList");
+  console.log(myNumberList);
+
+  // const button = await page.evaluate(() => document.querySelector("#num4"));
+  // await button.click();
+
+  // const $ = cheerio.load(content);
 };

@@ -11,6 +11,7 @@ import * as puppeteer from "puppeteer";
 
 import {
   buyLottery,
+  getAllMyFavoriteNumbers,
   getCurrentLotteryNumbers,
   getUserInformation,
   signIn
@@ -27,7 +28,7 @@ router.post("/test", async (ctx, next) => {
 
   const browser = await puppeteer.launch({ headless: false }); // default is true
   const loginResult = await signIn({ id, pwd, browser });
-  await buyLottery(loginResult, waysToBuy);
+  await buyLottery(browser, loginResult, waysToBuy);
   ctx.body = "Test";
   await next();
 });
@@ -36,8 +37,8 @@ router.get("/lotteryer", async (ctx, next) => {
   const { id, pwd } = ctx.request.query;
 
   const browser = await puppeteer.launch({ headless: false }); // default is true
-  const loginResult = await signIn({ id, pwd, browser });
-  const result = await getUserInformation(loginResult);
+  const loginResultPage = await signIn({ id, pwd, browser });
+  const result = await getUserInformation(loginResultPage);
   browser.close();
   ctx.body = result;
   await next();
@@ -47,6 +48,20 @@ router.get("/current-draw-number", async (ctx, next) => {
   const browser = await puppeteer.launch({ headless: false }); // default is true
   const result = await getCurrentLotteryNumbers(browser);
   ctx.body = result;
+  browser.close();
+  await next();
+});
+
+router.get("/all-my-favorite-numbers", async (ctx, next) => {
+  const { id, pwd } = ctx.request.query;
+
+  const browser = await puppeteer.launch({
+    headless: false,
+    args: ["--disable-features=site-per-process"]
+  }); // default is true
+  const loginResultPage = await signIn({ id, pwd, browser });
+  const result = await getAllMyFavoriteNumbers(browser, loginResultPage);
+
   browser.close();
   await next();
 });
